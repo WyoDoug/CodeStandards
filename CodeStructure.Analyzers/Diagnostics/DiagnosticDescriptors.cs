@@ -18,7 +18,7 @@ public static class DiagnosticDescriptors
     }
 
     private const string HelpLinkBase =
-        "https://github.com/jackalope-technologies/CodingStandards/blob/main/docs/analyzers/";
+        "https://github.com/WyoDoug/CodeStandards/blob/master/docs/analyzers/";
 
     public static readonly DiagnosticDescriptor STR0001 =
         new DiagnosticDescriptor(DiagnosticIds.STR0001,
