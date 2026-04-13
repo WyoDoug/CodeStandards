@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/Solution/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="ai-assistant-instructions.md" />
+    <File Path="AnalyzerBuildInstructions.md" />
+    <File Path="azure-pipelines.yml" />
+    <File Path="CodingStandards.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="NuGet.config" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="CodeStructure.Analyzers.CodeFixes/CodeStructure.Analyzers.CodeFixes.csproj" />
+  <Project Path="CodeStructure.Analyzers/CodeStructure.Analyzers.csproj" />
+  <Project Path="tests/CodeStructure.Analyzers.Tests/CodeStructure.Analyzers.Tests.csproj" />
+</Solution>

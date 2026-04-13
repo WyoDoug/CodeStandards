@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <!-- Use PackageVersion environment variable from CI, or generate local version -->
+    <Version Condition="'$(PackageVersion)' != ''">$(PackageVersion)</Version>
+    <Version Condition="'$(PackageVersion)' == ''">$([System.DateTime]::Now.ToString('yyyy.MM.dd.HHmm'))-local</Version>
+
+    <!-- Common package metadata -->
+    <Authors>Jackalope Technologies</Authors>
+    <Company>Jackalope Technologies</Company>
+    <Copyright>Copyright © Jackalope Technologies $([System.DateTime]::Now.Year)</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+</Project>

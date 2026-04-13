@@ -1,0 +1,82 @@
+trigger:
+  branches:
+    include:
+      - master
+
+pr:
+  branches:
+    include:
+      - master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  feedName: 'JackalopeTechnologiesCodingStandards'
+
+steps:
+  - pwsh: |
+      $version = Get-Date -Format "yyyy.MM.dd.HHmm"
+      Write-Host "##vso[task.setvariable variable=PackageVersion]$version"
+      Write-Host "Generated version: $version"
+    displayName: 'Generate version number'
+
+  - task: UseDotNet@2
+    displayName: 'Use .NET 10 SDK'
+    inputs:
+      packageType: 'sdk'
+      version: '10.x'
+
+  - task: UseDotNet@2
+    displayName: 'Use .NET 10 SDK'
+    inputs:
+      packageType: 'sdk'
+      version: '10.x'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore NuGet packages'
+    inputs:
+      command: 'restore'
+      projects: '**/*.csproj'
+      feedsToUse: 'config'
+      nugetConfigPath: 'NuGet.config'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Build solution'
+    env:
+      PackageVersion: $(PackageVersion)
+    inputs:
+      command: 'build'
+      projects: '**/*.csproj'
+      arguments: '--configuration $(buildConfiguration) --no-restore'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Run tests'
+    inputs:
+      command: 'test'
+      projects: 'tests/**/*.csproj'
+      arguments: '--configuration $(buildConfiguration) --no-build'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Pack NuGet package'
+    env:
+      PackageVersion: $(PackageVersion)
+    inputs:
+      command: 'pack'
+      packagesToPack: 'CodeStructure.Analyzers/CodeStructure.Analyzers.csproj'
+      configuration: '$(buildConfiguration)'
+      outputDir: '$(Build.ArtifactStagingDirectory)'
+
+  - task: NuGetAuthenticate@1
+    displayName: 'Authenticate to Azure Artifacts'
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+
+  - task: NuGetCommand@2
+    displayName: 'Push to Azure Artifacts feed'
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: '$(feedName)'

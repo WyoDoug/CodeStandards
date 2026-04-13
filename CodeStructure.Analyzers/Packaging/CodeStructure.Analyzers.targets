@@ -1,0 +1,10 @@
+<Project>
+	<!--
+    .editorconfig is included as CodeStructure.editorconfig.txt in the package root.
+    To opt in, copy it to your solution directory and rename to .editorconfig:
+
+    1. Find the package in your NuGet cache:
+       %USERPROFILE%\.nuget\packages\codestructure.analyzers\{version}\CodeStructure.editorconfig.txt
+    2. Copy to your solution directory and rename to .editorconfig
+  -->
+</Project>

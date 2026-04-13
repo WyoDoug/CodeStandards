@@ -1,0 +1,64 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+		<IsPackable>true</IsPackable>
+		<PackageId>CodeStructure.Analyzers</PackageId>
+		<!-- Version comes from Directory.Build.props (uses PackageVersion env var from CI) -->
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<NoDefaultExcludes>true</NoDefaultExcludes>
+		<SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+		<!-- Local dev: output to LocalNuGetFeed; CI overrides via output flag -->
+		<PackageOutputPath Condition="'$(TF_BUILD)' != 'True'">$(MSBuildThisFileDirectory)..\..\LocalNuGetFeed</PackageOutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+	</ItemGroup>
+
+	<!-- Explicitly exclude .editorconfig from package - users must manually copy it to opt in -->
+	<ItemGroup>
+		<None Remove="**\.editorconfig" />
+		<Content Remove="**\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="$(TargetDir)CodeStructure.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<None Include="Packaging\CodeStructure.Analyzers.props" Pack="true" PackagePath="build\CodeStructure.Analyzers.props" />
+		<None Include="Packaging\CodeStructure.Analyzers.targets" Pack="true"
+		      PackagePath="build\CodeStructure.Analyzers.targets" />
+		<None Include="..\README.md" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<Target Name="BuildCodeFixes" BeforeTargets="GenerateNuspec">
+		<MSBuild Projects="..\CodeStructure.Analyzers.CodeFixes\CodeStructure.Analyzers.CodeFixes.csproj" Targets="Build"
+		         Properties="Configuration=$(Configuration)" />
+	</Target>
+
+	<Target Name="IncludeCodeFixesInPack" BeforeTargets="GenerateNuspec" DependsOnTargets="BuildCodeFixes">
+		<ItemGroup>
+			<_PackageFiles
+				Include="..\CodeStructure.Analyzers.CodeFixes\bin\$(Configuration)\netstandard2.0\CodeStructure.Analyzers.CodeFixes.dll"
+				PackagePath="analyzers/dotnet/cs" />
+		</ItemGroup>
+	</Target>
+
+	<!-- Include .editorconfig as reference file with renamed extension so it doesn't auto-apply -->
+	<Target Name="PrepareEditorConfig" BeforeTargets="GenerateNuspec">
+		<Copy SourceFiles="..\.editorconfig" DestinationFiles="$(IntermediateOutputPath)CodeStructure.editorconfig.txt" />
+		<ItemGroup>
+			<_PackageFiles Include="$(IntermediateOutputPath)CodeStructure.editorconfig.txt" PackagePath="" />
+		</ItemGroup>
+	</Target>
+
+</Project>
