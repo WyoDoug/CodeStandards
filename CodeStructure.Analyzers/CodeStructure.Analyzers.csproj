@@ -11,6 +11,11 @@
 		<IncludeBuildOutput>false</IncludeBuildOutput>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Description>Roslyn analyzers enforcing consistent code structure, style, naming, and numeric safety. 24 rules with code fixes covering single-return, no-continue, field naming, magic numbers, encapsulation, and more.</Description>
+		<PackageProjectUrl>https://github.com/WyoDoug/CodeStandards</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/WyoDoug/CodeStandards.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>analyzers;roslyn;code-analysis;coding-standards;code-quality</PackageTags>
 		<NoDefaultExcludes>true</NoDefaultExcludes>
 		<SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
 		<!-- Local dev: output to LocalNuGetFeed; CI overrides via output flag -->
