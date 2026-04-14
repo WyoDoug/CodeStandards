@@ -567,6 +567,42 @@ class C
     }
 
     [Fact]
+    public async Task STR0010_AllowsThrowIfNullOrWhiteSpace()
+    {
+        var source = @"
+using System;
+
+class C
+{
+    public void M(string value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(value);
+    }
+}
+";
+
+        await AnalyzerTestUtilities.VerifyAnalyzerAsync<Str0010MissingArgumentValidationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task STR0010_AllowsThrowIfNullOrEmpty()
+    {
+        var source = @"
+using System;
+
+class C
+{
+    public void M(string value)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(value);
+    }
+}
+";
+
+        await AnalyzerTestUtilities.VerifyAnalyzerAsync<Str0010MissingArgumentValidationAnalyzer>(source);
+    }
+
+    [Fact]
     public async Task STR0010_AllowsNullableAndDefaultValues()
     {
         var source = @"

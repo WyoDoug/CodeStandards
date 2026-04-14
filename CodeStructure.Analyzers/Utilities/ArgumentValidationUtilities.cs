@@ -1,5 +1,5 @@
 // // ArgumentValidationUtilities.cs
-// // Copyright © 2012–Present Jackalope Technologies, Inc. and Doug Gerard.
+// // Copyright ï¿½ 2012ï¿½Present Jackalope Technologies, Inc. and Doug Gerard.
 // // Use subject to the MIT License.
 
 #region Usings
@@ -33,7 +33,7 @@ public static class ArgumentValidationUtilities
                     break;
                 }
 
-                if (IsThrowIfNullInvocation(node, parameterSymbol, semanticModel))
+                if (IsThrowIfInvocation(node, parameterSymbol, semanticModel))
                 {
                     result = true;
                     break;
@@ -72,9 +72,9 @@ public static class ArgumentValidationUtilities
         return result;
     }
 
-    private static bool IsThrowIfNullInvocation(SyntaxNode node,
-                                                IParameterSymbol parameterSymbol,
-                                                SemanticModel semanticModel)
+    private static bool IsThrowIfInvocation(SyntaxNode node,
+                                             IParameterSymbol parameterSymbol,
+                                             SemanticModel semanticModel)
     {
         var result = false;
 
@@ -82,16 +82,19 @@ public static class ArgumentValidationUtilities
         {
             string methodName = GetInvocationName(invocation);
 
-            if (IsThrowIfNullMethodName(methodName))
+            if (methodName.StartsWith("ThrowIf", StringComparison.Ordinal))
             {
-                var arguments = invocation.ArgumentList.Arguments;
-
-                if (arguments.Count > 0)
+                if (IsExceptionClassMethod(invocation, semanticModel))
                 {
-                    var firstArgument = arguments[index: 0];
+                    var arguments = invocation.ArgumentList.Arguments;
 
-                    if (IsParameterIdentifier(firstArgument.Expression, parameterSymbol, semanticModel))
-                        result = true;
+                    if (arguments.Count > 0)
+                    {
+                        var firstArgument = arguments[index: 0];
+
+                        if (IsParameterIdentifier(firstArgument.Expression, parameterSymbol, semanticModel))
+                            result = true;
+                    }
                 }
             }
         }
@@ -99,23 +102,41 @@ public static class ArgumentValidationUtilities
         return result;
     }
 
-    private static bool IsThrowIfNullMethodName(string methodName)
+    private static bool IsExceptionClassMethod(InvocationExpressionSyntax invocation,
+                                                SemanticModel semanticModel)
     {
         var result = false;
+        var methodSymbol = semanticModel.GetSymbolInfo(invocation).Symbol as IMethodSymbol;
 
-        if (string.Equals(methodName, "ThrowIfNull", StringComparison.Ordinal))
-            result = true;
-
-        if (!result)
+        if (methodSymbol != null)
         {
-            if (string.Equals(methodName, "ThrowIfNullOrWhiteSpace", StringComparison.Ordinal))
-                result = true;
+            var containingType = methodSymbol.ContainingType;
+
+            if (containingType != null)
+            {
+                if (InheritsFromException(containingType))
+                    result = true;
+            }
         }
 
-        if (!result)
+        return result;
+    }
+
+    private static bool InheritsFromException(INamedTypeSymbol type)
+    {
+        var result = false;
+        var current = type;
+
+        while (current != null)
         {
-            if (string.Equals(methodName, "ThrowIfNullOrEmpty", StringComparison.Ordinal))
+            if (string.Equals(current.Name, "Exception", StringComparison.Ordinal) &&
+                string.Equals(current.ContainingNamespace?.ToString(), "System", StringComparison.Ordinal))
+            {
                 result = true;
+                break;
+            }
+
+            current = current.BaseType;
         }
 
         return result;
